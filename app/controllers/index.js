@@ -1,0 +1,63 @@
+module.exports = function(router) {
+  var Helper    = require('./helper.js');
+  var fs        = require('fs');
+  var glob      = require('glob');
+
+  router.get("/", function(req, res) {
+    req.globals.db.query('select * from people', function (error, results, fields) {
+      if(!error) {
+        res.locals.people = results;
+      } else console.log(error);
+      return res.render("index", { title: 'Homepage' });
+    });
+  });
+
+  router.post("/person/add", function(req, res) {
+    if(!req.body.name || !req.body.imdb_url)
+      return res.redirect('/');
+
+    if(!req.body.imdb_url.match(/^http/))
+      return res.redirect('/');
+
+    req.globals.db.query('insert into people set ?', req.body, function (error, results, fields) {
+      return res.redirect('/');
+    });
+  });
+
+  router.get("/person/:id", function(req, res) {
+    req.globals.db.query('select * from person_face_images where person_id = ?', req.params.id, function (error, results, fields) {
+      if(!error) {
+        res.locals.person_id = req.params.id;
+        res.locals.images  = results;
+      } else console.log(error);
+      return res.render("person", { title: 'Homepage' });
+    });
+  });
+
+  router.post("/picture/add/:person_id", function(req, res) {
+    var mimetype = "data:"+req.file.mimetype+";base64,"
+    var bitmap = fs.readFileSync(req.file.path);
+    var base64 = mimetype + (new Buffer(bitmap).toString('base64'));
+    req.globals.db.query('insert into person_face_images set ?', {person_id: req.params.person_id, base64: base64}, function (error, results, fields) {
+      return res.redirect('/person/'+req.params.person_id);
+    });
+  });
+
+  router.get("/data", function(req, res) {
+    var people = {};
+    var query = "";
+    query += "select p.id, p.name, p.imdb_url, pfi.base64 ";
+    query += " from people p ";
+    query += " left join person_face_images pfi on pfi.person_id = p.id";
+    req.globals.db.query(query, function(error, results, fields) {
+      for(var index in results) {
+        var row = results[index];
+        if(!people[row.id])
+          people[row.id] = { name: row.name, imdb_url: row.imdb_url, images: [] };
+        if(row.base64)
+          people[row.id].images.push(row.base64.toString());
+      }
+      return res.json(people);
+    });
+  });
+};
