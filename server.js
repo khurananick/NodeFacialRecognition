@@ -10,21 +10,17 @@ var Env           = require('./secret.js').Env;
 
 var base_url = (function() {
   if(Env.PRODUCTION)
-    return "http://a3096843.ngrok.io";
+    return "http://facerec.benerdy.net";
   return "http://localhost:8080";
 })();
 
 var port = (function() {
-  if(Env.PRODUCTION) return { http: 80 };
-  else return { http: Env.PORT };
+  return { http: Env.PORT };
 })();
 
 var DB = (function() {
   var creds = (function() {
-    if(Env.PRODUCTION)
-      return {};
-    else
-      return { host: Env.DBHOST, user: Env.DBUSER, password: Env.DBPASSWORD, database: Env.DBNAME };
+    return { host: Env.DBHOST, user: Env.DBUSER, password: Env.DBPASSWORD, database: Env.DBNAME };
   })();
   creds.connectionLimit = 1;
   return mysql.createPool(creds);
