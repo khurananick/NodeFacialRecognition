@@ -56,7 +56,7 @@ module.exports = function(router) {
   router.get("/data", function(req, res) {
     var people = {};
     var query = `
-      select p.id, p.name, p.imdb_url, p.descriptors, "" as base64
+      select p.id, p.name, p.imdb_url, p.descriptors, null as base64
       from people p
       where p.descriptors is not null
       union
