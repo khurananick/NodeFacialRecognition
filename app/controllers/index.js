@@ -4,7 +4,7 @@ module.exports = function(router) {
   var glob      = require('glob');
 
   router.get("/", function(req, res) {
-    req.globals.db.query('select * from people', function (error, results, fields) {
+    req.globals.db.query('select * from people order by name asc', function (error, results, fields) {
       if(!error) {
         res.locals.people = results;
       } else console.log(error);
