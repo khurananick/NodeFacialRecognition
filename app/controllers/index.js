@@ -48,7 +48,8 @@ module.exports = function(router) {
   router.post("/person/:id/descriptors", function(req, res) {
     if(!req.body.descriptors)
       return res.json({erro: 'MISSING_DATA'});
-    req.globals.db.query('update people set ? where id = ?', [{descriptors: req.body.descriptors}, req.params.id], function (error, results, fields) {
+    req.globals.db.query('update people set ? where id = ?', [{descriptors: req.body.descriptors, descriptors_set_at: (new Date())}, req.params.id], function (error, results, fields) {
+      if(error) return res.json({error: error});
       return res.json({success: true});
     });
   });
@@ -56,11 +57,11 @@ module.exports = function(router) {
   router.get("/data", function(req, res) {
     var people = {};
     var query = `
-      select p.id, p.name, p.imdb_url, p.descriptors, null as base64
+      select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, null as base64
       from people p
       where p.descriptors is not null
       union
-      select p.id, p.name, p.imdb_url, p.descriptors, pfi.base64
+      select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, pfi.base64
       from people p
         left join person_face_images pfi on pfi.person_id = p.id
       where p.descriptors is null
