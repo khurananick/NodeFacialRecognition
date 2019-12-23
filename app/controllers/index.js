@@ -61,7 +61,7 @@ module.exports = function(router) {
       for(var index in results) {
         var row = results[index];
         if(!people[row.id])
-          people[row.id] = { name: row.name, imdb_url: row.imdb_url, images: [] };
+          people[row.id] = { name: row.name, imdb_url: row.imdb_url, descriptors: row.descriptors, images: [] };
         if(row.base64)
           people[row.id].images.push(row.base64.toString());
       }
