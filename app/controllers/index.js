@@ -39,7 +39,9 @@ module.exports = function(router) {
     var bitmap = fs.readFileSync(req.file.path);
     var base64 = mimetype + (new Buffer(bitmap).toString('base64'));
     req.globals.db.query('insert into person_face_images set ?', {person_id: req.params.person_id, base64: base64}, function (error, results, fields) {
-      return res.redirect('/person/'+req.params.person_id);
+      req.globals.db.query('update people set descriptors = null where id = ?', req.params.person_id, function (error, results, fields) {
+        return res.redirect('/person/'+req.params.person_id);
+      });
     });
   });
 
@@ -53,10 +55,16 @@ module.exports = function(router) {
 
   router.get("/data", function(req, res) {
     var people = {};
-    var query = "";
-    query += "select p.id, p.name, p.imdb_url, p.descriptors, pfi.base64 ";
-    query += " from people p ";
-    query += " left join person_face_images pfi on pfi.person_id = p.id";
+    var query = `
+      select p.id, p.name, p.imdb_url, p.descriptors, "" as base64
+      from people p
+      where p.descriptors is not null
+      union
+      select p.id, p.name, p.imdb_url, p.descriptors, pfi.base64
+      from people p
+        left join person_face_images pfi on pfi.person_id = p.id
+      where p.descriptors is null
+    `;
     req.globals.db.query(query, function(error, results, fields) {
       for(var index in results) {
         var row = results[index];
