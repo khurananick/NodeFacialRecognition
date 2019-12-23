@@ -82,4 +82,41 @@ module.exports = function(router) {
       return res.json(people);
     });
   });
+
+  router.get("/images/all/resize", function(req, res) {
+    return res.json({error: 'DISABLED'});
+    const sharp = require('sharp');
+    req.globals.db.query('select * from person_face_images pfi where char_length(pfi.base64) > 30000', function (error, results, fields) {
+      if(error) return res.json({error: error});
+      if(!results) return res.json({error: "NO_RESULTS_FOUND"});
+      var index = 0;
+      function iterateImages(index) {
+        var row = results[index];
+        if(!row) return res.json({success: true});
+
+        var base64Image = row.base64.toString();
+        var parts = base64Image.split(';');
+        var mimType = parts[0].split(':')[1];
+        var imageData = parts[1].split(',')[1];
+        var img = new Buffer(imageData, 'base64');
+        sharp(img)
+          .jpeg({quality:100,progressive:true})
+          .resize(150)
+          .toBuffer()
+          .then(resizedImageBuffer => {
+            let resizedImageData = resizedImageBuffer.toString('base64');
+            let resizedBase64 = `data:${mimType};base64,${resizedImageData}`;
+            req.globals.db.query('update person_face_images set base64 = ? where id = ?', [resizedBase64, row.id], function() {
+              req.globals.db.query('update people set descriptors = null where id = ?', row.person_id, function() {
+                iterateImages((index+1));
+              });
+            });
+          })
+          .catch(error => {
+            console.log(error);
+          })
+      }
+      iterateImages(index);
+    });
+  });
 };
