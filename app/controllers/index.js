@@ -43,6 +43,14 @@ module.exports = function(router) {
     });
   });
 
+  router.post("/person/:id/descriptors", function(req, res) {
+    if(!req.body.descriptors)
+      return res.json({erro: 'MISSING_DATA'});
+    req.globals.db.query('update people set ? where id = ?', [{descriptors: req.body.descriptors}, req.params.id], function (error, results, fields) {
+      return res.json({success: true});
+    });
+  });
+
   router.get("/data", function(req, res) {
     var people = {};
     var query = "";
