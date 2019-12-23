@@ -62,6 +62,7 @@ module.exports = function(router) {
         var row = results[index];
         if(!people[row.id])
           people[row.id] = {
+            person_id: row.id,
             name: row.name,
             imdb_url: row.imdb_url,
             descriptors: (row.descriptors ? row.descriptors.toString() : null),
