@@ -54,7 +54,7 @@ module.exports = function(router) {
   router.get("/data", function(req, res) {
     var people = {};
     var query = "";
-    query += "select p.id, p.name, p.imdb_url, pfi.base64 ";
+    query += "select p.id, p.name, p.imdb_url, p.descriptors, pfi.base64 ";
     query += " from people p ";
     query += " left join person_face_images pfi on pfi.person_id = p.id";
     req.globals.db.query(query, function(error, results, fields) {
