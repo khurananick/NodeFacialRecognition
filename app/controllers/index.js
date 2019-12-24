@@ -73,11 +73,11 @@ module.exports = function(router) {
     var query = `
       select *
       from (
-        select p.id, p.name, p.website_url, p.descriptors, p.descriptors_set_at, null as base64
+        select p.id, p.name, p.website_url, p.donations_url, p.descriptors, p.descriptors_set_at, null as base64
         from people p
         where p.descriptors is not null
         union
-        select p.id, p.name, p.website_url, p.descriptors, p.descriptors_set_at, pfi.base64
+        select p.id, p.name, p.website_url, p.donations_url, p.descriptors, p.descriptors_set_at, pfi.base64
         from people p
           left join person_face_images pfi on pfi.person_id = p.id
         where p.descriptors is null
@@ -94,6 +94,7 @@ module.exports = function(router) {
             person_id: row.id,
             name: row.name,
             website_url: row.website_url,
+            donations_url: row.donations_url,
             descriptors: (row.descriptors ? row.descriptors.toString() : null),
             descriptors_set_at: row.descriptors_set_at,
             images: []
