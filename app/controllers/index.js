@@ -39,7 +39,7 @@ module.exports = function(router) {
     var bitmap = fs.readFileSync(req.file.path);
     var base64 = mimetype + (new Buffer(bitmap).toString('base64'));
     req.globals.db.query('insert into person_face_images set ?', {person_id: req.params.person_id, base64: base64}, function (error, results, fields) {
-      req.globals.db.query('update people set descriptors = null where id = ?', req.params.person_id, function (error, results, fields) {
+      req.globals.db.query('update people set descriptors = null, descriptors_set_at = null where id = ?', req.params.person_id, function (error, results, fields) {
         return res.redirect('/person/'+req.params.person_id);
       });
     });
@@ -55,18 +55,23 @@ module.exports = function(router) {
   });
 
   router.get("/data", function(req, res) {
-    var people = {};
     var query = `
-      select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, null as base64
-      from people p
-      where p.descriptors is not null
-      union
-      select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, pfi.base64
-      from people p
-        left join person_face_images pfi on pfi.person_id = p.id
-      where p.descriptors is null
+      select *
+      from (
+        select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, null as base64
+        from people p
+        where p.descriptors is not null
+        union
+        select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, pfi.base64
+        from people p
+          left join person_face_images pfi on pfi.person_id = p.id
+        where p.descriptors is null
+      )sub
+      order by sub.descriptors_set_at desc
     `;
+    var people = {};
     req.globals.db.query(query, function(error, results, fields) {
+      var first = results[0];
       for(var index in results) {
         var row = results[index];
         if(!people[row.id])
@@ -75,12 +80,13 @@ module.exports = function(router) {
             name: row.name,
             imdb_url: row.imdb_url,
             descriptors: (row.descriptors ? row.descriptors.toString() : null),
+            descriptors_set_at: row.descriptors_set_at,
             images: []
           };
         if(row.base64)
           people[row.id].images.push(row.base64.toString());
       }
-      return res.json(people);
+      return res.json({version: first.descriptors_set_at, people: people});
     });
   });
 
@@ -120,7 +126,7 @@ module.exports = function(router) {
             let resizedImageData = resizedImageBuffer.toString('base64');
             let resizedBase64 = `data:${mimType};base64,${resizedImageData}`;
             req.globals.db.query('update person_face_images set base64 = ? where id = ?', [resizedBase64, row.id], function() {
-              req.globals.db.query('update people set descriptors = null where id = ?', row.person_id, function() {
+              req.globals.db.query('update people set descriptors = null, descriptors_set_at = null where id = ?', row.person_id, function() {
                 iterateImages((index+1));
               });
             });
