@@ -84,6 +84,18 @@ module.exports = function(router) {
     });
   });
 
+  router.get("/data/version", function(req, res) {
+    req.globals.db.query('select id from people where descriptors is null', function (error, results, fields) {
+      if(error)
+        return res.json({error: error});
+      if(results[0])
+        return res.json({version: (new Date())})
+      req.globals.db.query('select descriptors_set_at from people order by descriptors_set_at desc limit 1', function (error, results, fields) {
+        res.json({version: results[0].descriptors_set_at});
+      });
+    });
+  });
+
   router.get("/images/all/resize", function(req, res) {
     return res.json({error: 'DISABLED'});
     const sharp = require('sharp');
