@@ -35,7 +35,7 @@ module.exports = function(router) {
   });
 
   router.get("/person/:id/img", function(req, res) {
-    req.globals.db.query('select * from person_face_images where person_id = ? limit 1', req.params.id, function (error, results, fields) {
+    req.globals.db.query('select * from person_face_images where person_id = ? order by id desc limit 1', req.params.id, function (error, results, fields) {
       var base64 = results[0].base64.toString();
       var img = Buffer.from(base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, ''), 'base64');
       var mimetype = base64.toString().split(";")[0].split(":")[1];
