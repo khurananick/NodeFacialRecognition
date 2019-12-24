@@ -50,7 +50,9 @@ module.exports = function(router) {
       return res.json({erro: 'MISSING_DATA'});
     req.globals.db.query('update people set ? where id = ?', [{descriptors: req.body.descriptors, descriptors_set_at: (new Date())}, req.params.id], function (error, results, fields) {
       if(error) return res.json({error: error});
-      return res.json({success: true});
+      req.globals.db.query('select descriptors_set_at from people where id = ?', req.params.id, function (error, results, fields) {
+        return res.json({success: true, version: results[0].descriptors_set_at});
+      });
     });
   });
 
