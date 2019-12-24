@@ -34,6 +34,13 @@ module.exports = function(router) {
     });
   });
 
+  router.get("/person/:id/img/base64", function(req, res) {
+    req.globals.db.query('select * from person_face_images where person_id = ? limit 1', req.params.id, function (error, results, fields) {
+      res.set('Content-Type', 'text/html');
+      return res.send(results[0].base64);
+    });
+  });
+
   router.post("/picture/add/:person_id", function(req, res) {
     var mimetype = "data:"+req.file.mimetype+";base64,"
     var bitmap = fs.readFileSync(req.file.path);
