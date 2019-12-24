@@ -13,10 +13,10 @@ module.exports = function(router) {
   });
 
   router.post("/person/add", function(req, res) {
-    if(!req.body.name || !req.body.imdb_url)
+    if(!req.body.name || !req.body.website_url)
       return res.redirect('/');
 
-    if(!req.body.imdb_url.match(/^http/))
+    if(!req.body.website_url.match(/^http/))
       return res.redirect('/');
 
     req.globals.db.query('insert into people set ?', req.body, function (error, results, fields) {
@@ -67,11 +67,11 @@ module.exports = function(router) {
     var query = `
       select *
       from (
-        select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, null as base64
+        select p.id, p.name, p.website_url, p.descriptors, p.descriptors_set_at, null as base64
         from people p
         where p.descriptors is not null
         union
-        select p.id, p.name, p.imdb_url, p.descriptors, p.descriptors_set_at, pfi.base64
+        select p.id, p.name, p.website_url, p.descriptors, p.descriptors_set_at, pfi.base64
         from people p
           left join person_face_images pfi on pfi.person_id = p.id
         where p.descriptors is null
@@ -87,7 +87,7 @@ module.exports = function(router) {
           people[row.id] = {
             person_id: row.id,
             name: row.name,
-            imdb_url: row.imdb_url,
+            website_url: row.website_url,
             descriptors: (row.descriptors ? row.descriptors.toString() : null),
             descriptors_set_at: row.descriptors_set_at,
             images: []
