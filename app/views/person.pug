@@ -3,11 +3,11 @@ block content
   div(class="row")
     div(class="col-sm-10 col-sm-offset-1 text-center")
       - action_url = "/picture/add/" + person_id;
-      form(method="POST" action=action_url class="form-inline"  enctype="multipart/form-data")
+      form(id="uploads" method="POST" action=action_url class="form-inline"  enctype="multipart/form-data")
         div(class="form-group space-right")
           label Image
-          input(class="form-control" type="file" name="file")
-        button(class="btn btn-warning" type="submit") Add
+          input(id="files" class="form-control" type="file" name="files" multiple="multiple" data-person_id=person_id)
+        button(id="add" class="btn btn-warning") Add
   hr
   div(class="row")
     div(class="col-sm-10 col-sm-offset-1")
