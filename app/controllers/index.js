@@ -126,7 +126,7 @@ module.exports = function(router) {
         var img = new Buffer(imageData, 'base64');
         sharp(img)
           .jpeg({quality:100,progressive:true})
-          .resize(150)
+          .resize(200)
           .toBuffer()
           .then(resizedImageBuffer => {
             let resizedImageData = resizedImageBuffer.toString('base64');
