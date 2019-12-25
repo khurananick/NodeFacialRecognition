@@ -54,7 +54,7 @@ function labelFaceDescriptions() {
         url: (BASE_URL + "/person/"+person_id+"/descriptors"),
         data: { descriptors: JSON.stringify(descriptors) }
       }).done(function(resp) {
-        alert("Done.");
+        document.location.reload();
       });
     } else console.log("no faces detected for ", person);
   });
