@@ -25,12 +25,15 @@ module.exports = function(router) {
   });
 
   router.get("/person/:id", function(req, res) {
-    req.globals.db.query('select * from person_face_images where person_id = ?', req.params.id, function (error, results, fields) {
-      if(!error) {
-        res.locals.person_id = req.params.id;
-        res.locals.images  = results;
-      } else console.log(error);
-      return res.render("person", { title: 'Homepage' });
+    req.globals.db.query('select * from people where id = ?', req.params.id, function (error, people, fields) {
+      req.globals.db.query('select * from person_face_images where person_id = ?', req.params.id, function (error, results, fields) {
+        if(!error) {
+          res.locals.person = people[0];
+          res.locals.person_id = req.params.id;
+          res.locals.images  = results;
+        } else console.log(error);
+        return res.render("person", { title: 'Homepage' });
+      });
     });
   });
 

@@ -22,5 +22,17 @@ block content
           for image in images
             div(class="col-sm-6 col-md-4")
               img(src=image.base64.toString() class="person_img" style="max-width:100%;")
+  hr
+  div(class="row")
+    div(class="col-sm-12")
+      if person.descriptors
+        h4
+          b Descriptors
+        pre
+          code=person.descriptors
+      else
+        h4
+          b Descriptors missing.
+
   script.
     window.person_id = #{person_id};
