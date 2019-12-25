@@ -80,38 +80,17 @@ module.exports = function(router) {
 
   router.get("/data", function(req, res) {
     var query = `
-      select *
-      from (
-        select p.id, p.name, p.website_url, p.donations_url, p.descriptors, p.descriptors_set_at, null as base64
-        from people p
-        where p.descriptors is not null
-        union
-        select p.id, p.name, p.website_url, p.donations_url, p.descriptors, p.descriptors_set_at, pfi.base64
-        from people p
-          left join person_face_images pfi on pfi.person_id = p.id
-        where p.descriptors is null
-      )sub
-      order by sub.descriptors_set_at desc
+      select p.id as person_id, p.name, p.website_url, p.donations_url, p.descriptors, p.descriptors_set_at
+      from people p
+      where p.descriptors is not null
+      order by p.descriptors_set_at desc
     `;
     var people = {};
     req.globals.db.query(query, function(error, results, fields) {
       var first = results[0];
-      for(var index in results) {
-        var row = results[index];
-        if(!people[row.id])
-          people[row.id] = {
-            person_id: row.id,
-            name: row.name,
-            website_url: row.website_url,
-            donations_url: row.donations_url,
-            descriptors: (row.descriptors ? row.descriptors.toString() : null),
-            descriptors_set_at: row.descriptors_set_at,
-            images: []
-          };
-        if(row.base64)
-          people[row.id].images.push(row.base64.toString());
-      }
-      return res.json({version: first.descriptors_set_at, people: people});
+      for(var index in results)
+        results[index].descriptors = (results[index].descriptors ? results[index].descriptors.toString() : null)
+      return res.json({version: first.descriptors_set_at, people: results});
     });
   });
 
