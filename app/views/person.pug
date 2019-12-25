@@ -1,4 +1,9 @@
 extend layout
+block scripts
+  script(type='text/javascript' src="/js/lib/tensorflow-tjfs.min.js")
+  script(type='text/javascript' src="/js/lib/tensorflow-models-coco-ssd.min.js")
+  script(type='text/javascript' src="/js/lib/face-api.min.js")
+  script(type="text/javascript" src="/js/dev/images.js")
 block content
   div(class="row")
     div(class="col-sm-10 col-sm-offset-1 text-center")
@@ -7,7 +12,8 @@ block content
         div(class="form-group space-right")
           label Image
           input(id="files" class="form-control" type="file" name="files" multiple="multiple" data-person_id=person_id)
-        button(id="add" class="btn btn-warning") Add
+        button(id="add" class="btn btn-warning space-right") Upload
+        button(id="reloadDescriptors" class="btn btn-default") Reload Descriptors
   hr
   div(class="row")
     div(class="col-sm-10 col-sm-offset-1")
@@ -15,4 +21,6 @@ block content
         if(images)
           for image in images
             div(class="col-sm-6 col-md-4")
-              img(src=image.base64.toString() style="max-width:100%;")
+              img(src=image.base64.toString() class="person_img" style="max-width:100%;")
+  script.
+    window.person_id = #{person_id};

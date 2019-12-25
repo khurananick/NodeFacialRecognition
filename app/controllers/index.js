@@ -59,7 +59,8 @@ module.exports = function(router) {
   });
 
   router.post("/person/:id/base64images", function(req, res) {
-    req.globals.db.query('insert into person_face_images set ?', req.body.data, function (error, results, fields) {
+    var data = [req.body.data.map(item => [item.person_id, item.base64])];
+    req.globals.db.query('insert into person_face_images (person_id, base64) values ?', data, function (error, results, fields) {
       req.globals.db.query('update people set descriptors = null, descriptors_set_at = null where id = ?', req.params.person_id, function (error, results, fields) {
         return res.json({success:true});
       });
