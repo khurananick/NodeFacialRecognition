@@ -38,6 +38,7 @@ module.exports = function(router) {
   });
 
   router.get("/person/:id/img", function(req, res) {
+    delete res.cookie;
     req.globals.db.query('select * from person_face_images where person_id = ? order by id desc limit 1', req.params.id, function (error, results, fields) {
       var base64 = results[0].base64.toString();
       var img = Buffer.from(base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, ''), 'base64');
@@ -82,6 +83,7 @@ module.exports = function(router) {
   });
 
   router.get("/data", function(req, res) {
+    delete res.cookie;
     var query = `
       select p.id as person_id, p.name, p.website_url, p.donations_url, p.descriptors, p.descriptors_set_at
       from people p
@@ -98,6 +100,7 @@ module.exports = function(router) {
   });
 
   router.get("/data/version", function(req, res) {
+    delete res.cookie;
     req.globals.db.query('select id from people where descriptors is null', function (error, results, fields) {
       if(error)
         return res.json({error: error});
